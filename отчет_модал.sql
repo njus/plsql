@@ -5,10 +5,10 @@ begin
                     trim(sxk_list(mark || ': ' || qtymark || ' ')) qtymark,
                     max(total) prar,
                     round(sum(val) * 7 / 198, 2) el,
-                  case when trim(max(nocalk)) is not null then  'Не рассчитались операции: '||trim(sxk_list(mark || ': ' || nocalk ||chr(13))) end nocalk --не посчиталась свварка по опр.
+                  case when trim(max(nocalk)) is not null then  'РќРµ СЂР°СЃСЃС‡РёС‚Р°Р»РёСЃСЊ РѕРїРµСЂР°С†РёРё: '||trim(sxk_list(mark || ': ' || nocalk ||chr(13))) end nocalk --РЅРµ РїРѕСЃС‡РёС‚Р°Р»Р°СЃСЊ СЃРІРІР°СЂРєР° РїРѕ РѕРїСЂ.
                    ,null as ktpnumbs,
-                    sum(val) val --контрольное знач
-             from (select --подселект чтобы узнать к-во марок на группу
+                    sum(val) val --РєРѕРЅС‚СЂРѕР»СЊРЅРѕРµ Р·РЅР°С‡
+             from (select --РїРѕРґСЃРµР»РµРєС‚ С‡С‚РѕР±С‹ СѓР·РЅР°С‚СЊ Рє-РІРѕ РјР°СЂРѕРє РЅР° РіСЂСѓРїРїСѓ
                       grps,
                       mark,
                       count(1) qtymark,
@@ -72,7 +72,7 @@ begin
                                                              2382001
                                                        group by raiv.idRefItem,
                                                                 p_i.id
-                                                      having exists ( --исключим нулевые элементы компл карты
+                                                      having exists ( --РёСЃРєР»СЋС‡РёРј РЅСѓР»РµРІС‹Рµ СЌР»РµРјРµРЅС‚С‹ РєРѕРјРїР» РєР°СЂС‚С‹
                                                                     select /*+ index(a5 FK_ccc_REFATTRITEMVALUE_REFITE) index(a6 FK_ccc_REFATTRITEMVALUE_REFITE)*/
                                                                      nvl(a5.fFloat +
                                                                           a6.fFloat,
@@ -90,8 +90,8 @@ begin
                                                                        and nvl(a5.fFloat +
                                                                                a6.fFloat,
                                                                                0) > 0)) x
-                                              connect by prior --размножим элем. к.к. 1 строка - 1 штука марки
-                                                          idkompl = idkompl --не убирать это
+                                              connect by prior --СЂР°Р·РјРЅРѕР¶РёРј СЌР»РµРј. Рє.Рє. 1 СЃС‚СЂРѕРєР° - 1 С€С‚СѓРєР° РјР°СЂРєРё
+                                                          idkompl = idkompl --РЅРµ СѓР±РёСЂР°С‚СЊ СЌС‚Рѕ
                                                      and level <=
                                                          (select /*+ index(a5 FK_ccc_REFATTRITEMVALUE_REFITE) index(a6 FK_ccc_REFATTRITEMVALUE_REFITE)*/
                                                            nvl(a5.fFloat +
@@ -108,7 +108,7 @@ begin
                                                              and a6.idRefAttr =
                                                                  2385001)
                                                      and prior
-                                                          dbms_random.value is not null --не убирать это
+                                                          dbms_random.value is not null --РЅРµ СѓР±РёСЂР°С‚СЊ СЌС‚Рѕ
                                               ) kk_tuk
                                         left join (select /*+ leading(pov po) index(pov FK_mmm_PROCESSOPERATIONVER_VER) */
                                                    pov.idprocesscardversion,
@@ -152,7 +152,7 @@ begin
                                                        and oav.idattributegroupitem =
                                                            agi.id
                                                        and pov.id =
-                                                           oas.idoriginal) thckns, --толщина листов,           
+                                                           oas.idoriginal) thckns, --С‚РѕР»С‰РёРЅР° Р»РёСЃС‚РѕРІ,           
                                                    (select oav.fvalue
                                                       from ccc_objectattributeset   oas,
                                                            ccc_attributegroupitem   agi,
@@ -177,10 +177,10 @@ begin
                                                    po.smnemocode,
                                                    po.scaption,
                                                    (select vvv_varchar2_256(replace(max(s.smnemocode || '; '),
-                                                                                    'ГОСТ 14771-76 ',
+                                                                                    'Р“РћРЎРў 14771-76 ',
                                                                                     ''),
                                                                             regexp_substr((trim(replace(max(upper(s.smnemocode)),
-                                                                                                        'ГОСТ 14771-76',
+                                                                                                        'Р“РћРЎРў 14771-76',
                                                                                                         ''))),
                                                                                           '^[[:alpha:]][[:digit:]]{1,2}'))
                                                       from mmm_stdoperation s
@@ -189,19 +189,19 @@ begin
                                                        and s.idoperationtype =
                                                            po.idoperationtype
                                                        and Upper(s.sMnemocode) like
-                                                           Upper('ГОСТ 14771-76%')
+                                                           Upper('Р“РћРЎРў 14771-76%')
                                                      escape '(') GOST_TYPE
                                                     from mmm_processoperation    po,
                                                          mmm_processoperationver pov
-                                                  --к-во метров
+                                                  --Рє-РІРѕ РјРµС‚СЂРѕРІ
                                                    where pov.idprocessoperation =
                                                          po.id
-                                                     and po.idoperationtype in --п/автомат сварка тип операции
+                                                     and po.idoperationtype in --Рї/Р°РІС‚РѕРјР°С‚ СЃРІР°СЂРєР° С‚РёРї РѕРїРµСЂР°С†РёРё
                                                          (select distinct x.idoperationtype --, x.smnemocode, x.scaption
                                                             from mmm_StdOperation x
                                                            where Upper(x.sMnemocode) like
-                                                                 Upper('ГОСТ 14771-76%'))
-                                                     and pov.idworknormitem in --сварка норма
+                                                                 Upper('Р“РћРЎРў 14771-76%'))
+                                                     and pov.idworknormitem in --СЃРІР°СЂРєР° РЅРѕСЂРјР°
                                                          (select w.id --, w.smnemocode, w.scaption
                                                             from mmm_worknorm   w,
                                                                  ccc_FolderItem fi
@@ -215,7 +215,7 @@ begin
                                                                  fi.idOrigin
                                                              and fi.idType =
                                                                  4848001
-                                                                and w.id!=376001--перестановка полуавтомата 
+                                                                and w.id!=376001--РїРµСЂРµСЃС‚Р°РЅРѕРІРєР° РїРѕР»СѓР°РІС‚РѕРјР°С‚Р° 
                                                                  )                                                                 
                                                                  ) ppo
                                           on kk_tuk.idktpver =
@@ -226,7 +226,7 @@ begin
                                                    a1.sstring thc,
                                                    a2.sstring gost,
                                                    replace(a2.sstring,
-                                                           'ГОСТ 14771-76',
+                                                           'Р“РћРЎРў 14771-76',
                                                            '') stype,
                                                    a4.fFloat el,
                                                    a5.fFloat pr,
@@ -276,24 +276,24 @@ begin
                                                                  ccc_refattrapi.FindByMnemocode(p_i.idRef,
                                                                                                 'gost')
                                                              and instr(a.sstring,
-                                                                       'ГОСТ 14771-76') > 0)) spr
+                                                                       'Р“РћРЎРў 14771-76') > 0)) spr
                                           on instr(spr.stype, ppo.GOST_TYPE.n2) > 0
                                          and spr.thc =
                                              nvl(trim(ppo.thckns), trim(katet))
-                                       group by kk_tuk.rn --строка=марка в количестве 1
+                                       group by kk_tuk.rn --СЃС‚СЂРѕРєР°=РјР°СЂРєР° РІ РєРѕР»РёС‡РµСЃС‚РІРµ 1
                                       ) yyy 
-                                      model --модел нужен для разбиения по группм не превышающим 6 барабанов(198 кг)
+                                      model --РјРѕРґРµР» РЅСѓР¶РµРЅ РґР»СЏ СЂР°Р·Р±РёРµРЅРёСЏ РїРѕ РіСЂСѓРїРїРј РЅРµ РїСЂРµРІС‹С€Р°СЋС‰РёРј 6 Р±Р°СЂР°Р±Р°РЅРѕРІ(198 РєРі)
                                      dimension by(row_number() over(order by case when val is null then 1 else 0 end, val asc,mark, rn)  rn1) 
                                      measures(mark, smnemocode,/*rn10,*/rn, scaption, qtyinkk, qty, idktpver, nocalk, val, val total, 0 mmax, 0 as grps, 0 cntMInGr, 0 cntM) 
                                      rules(
-                                     total [ rn1 > 1 ] order by rn1 = --вспомог. кол
+                                     total [ rn1 > 1 ] order by rn1 = --РІСЃРїРѕРјРѕРі. РєРѕР»
                                     case
                                       when nvl(total [ cv() - 1 ], 0) + val [ cv() ] <= 198 then
                                        nvl(total [ cv() - 1 ], 0) + total [ cv() ]
                                       else
                                        total [ cv() ]
                                     end, 
-                                    mmax [ rn1 > 0 ] order by rn1 = --вспомог кол.
+                                    mmax [ rn1 > 0 ] order by rn1 = --РІСЃРїРѕРјРѕРі РєРѕР».
                                     case
                                        when nvl(total[cv()],0)=0 then -1
                                       when nvl(total [ cv()],0) + val [ cv()+1 ] <= 198 and  total [ cv() ]>0 then
@@ -301,7 +301,7 @@ begin
                                       else
                                         rn[cv()] 
                                     end, 
-                                    grps [ rn1 > 0 ] order by rn1 desc = --группы до 198 кг проволоки(до 6 мотков)
+                                    grps [ rn1 > 0 ] order by rn1 desc = --РіСЂСѓРїРїС‹ РґРѕ 198 РєРі РїСЂРѕРІРѕР»РѕРєРё(РґРѕ 6 РјРѕС‚РєРѕРІ)
                                     case
                                       when mmax [ cv() ] is null then
                                        grps [ cv() + 1 ]
